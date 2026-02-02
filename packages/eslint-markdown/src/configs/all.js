@@ -43,6 +43,7 @@ export default function all(plugin) {
       'md/code-lang-shorthand': 'error',
       'md/consistent-delete-style': 'error',
       'md/consistent-emphasis-style': 'error',
+      'md/consistent-unordered-list-style': 'error',
       'md/consistent-strong-style': 'error',
       'md/consistent-thematic-break-style': 'error',
       'md/no-control-character': 'error',
