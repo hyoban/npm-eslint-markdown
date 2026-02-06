@@ -1,5 +1,5 @@
 /**
- * @fileoverview Rule to enforce consistent unordered list marker style.
+ * @fileoverview Rule to enforce consistent unordered list style.
  * @author hyoban
  */
 
@@ -16,12 +16,12 @@ import { URL_RULE_DOCS } from '../core/constants.js';
 /**
  * @import { List, ListItem, Node } from 'mdast';
  * @import { RuleModule } from '../core/types.js';
- * @typedef {[{ style: 'consistent' | '-' | '*' | '+' | 'sublist' }]} RuleOptions
+ * @typedef {[{ style: 'consistent' | 'sublist' | '*' | '+' | '-' }]} RuleOptions
  * @typedef {'style'} MessageIds
  */
 
 // --------------------------------------------------------------------------------
-// Constants
+// Constant
 // --------------------------------------------------------------------------------
 
 const SUBLIST_MARKERS = ['*', '+', '-'];
@@ -36,7 +36,7 @@ export default {
     type: 'layout',
 
     docs: {
-      description: 'Enforce consistent unordered list marker style',
+      description: 'Enforce consistent unordered list style',
       url: URL_RULE_DOCS('consistent-unordered-list-style'),
       recommended: false,
       stylistic: true,
@@ -49,7 +49,7 @@ export default {
         type: 'object',
         properties: {
           style: {
-            enum: ['consistent', '-', '*', '+', 'sublist'],
+            enum: ['consistent', 'sublist', '*', '+', '-'],
           },
         },
         additionalProperties: false,
@@ -63,7 +63,7 @@ export default {
     ],
 
     messages: {
-      style: 'List marker style should be `{{ style }}`.',
+      style: 'Unordered list style should be `{{ style }}`.',
     },
 
     language: 'markdown',
@@ -76,11 +76,11 @@ export default {
     const [{ style }] = context.options;
 
     /** @type {string | null} */
-    let firstMarker = style === 'consistent' ? null : style;
+    let unorderedListStyle = style === 'consistent' ? null : style;
 
     /**
      * Get the depth of unordered list nesting for a list node.
-     * @param {List} listNode - The list node to check.
+     * @param {List} listNode The list node to check.
      * @returns {number} The depth of unordered list nesting (0 for top-level).
      */
     function getListDepth(listNode) {
@@ -98,17 +98,8 @@ export default {
       return depth;
     }
 
-    /**
-     * Get the expected marker for sublist mode based on depth.
-     * @param {number} depth - The nesting depth.
-     * @returns {string} The expected marker.
-     */
-    function getSublistMarker(depth) {
-      return SUBLIST_MARKERS[depth % 3];
-    }
-
     return {
-      /** @param {ListItem} node */
+      // TODO: list[ordered=false] > listItem?
       listItem(node) {
         const parentList = /** @type {List} */ (sourceCode.getParent(node));
 
@@ -118,24 +109,24 @@ export default {
         }
 
         const [nodeStartOffset] = sourceCode.getRange(node);
-        const currentMarker = sourceCode.text[nodeStartOffset];
+        const currentUnorderedListStyle = sourceCode.text[nodeStartOffset];
 
         /** @type {string} */
         let expectedMarker;
 
         if (style === 'sublist') {
           const depth = getListDepth(parentList);
-          expectedMarker = getSublistMarker(depth);
+          expectedMarker = SUBLIST_MARKERS[depth % 3];
         } else if (style === 'consistent') {
-          if (firstMarker === null) {
-            firstMarker = currentMarker;
+          if (unorderedListStyle === null) {
+            unorderedListStyle = currentUnorderedListStyle;
           }
-          expectedMarker = firstMarker;
+          expectedMarker = unorderedListStyle;
         } else {
           expectedMarker = style;
         }
 
-        if (currentMarker !== expectedMarker) {
+        if (expectedMarker !== currentUnorderedListStyle) {
           context.report({
             loc: {
               start: sourceCode.getLocFromIndex(nodeStartOffset),
