@@ -90,17 +90,17 @@ export default {
     const { sourceCode } = context;
     const [{ style }] = context.options;
 
-    /** @type {[Nullable<UnorderedListMarker>, Nullable<UnorderedListMarker>, Nullable<UnorderedListMarker>]} */
+    /** @type {Array<Nullable<UnorderedListMarker>>} */
     const unorderedListStyle = [
       style === 'consistent' || style === 'sublist' ? null : style,
-      null,
-      null,
     ];
     let unorderedListDepth = -1;
 
     return {
-      'list[ordered=false]'() {
-        // When entering an unordered list, increase depth.
+      list() {
+        // When entering a list node, increase the depth.
+        // `markdownlint` also increments depth for ordered lists,
+        // so `list[ordered=false]` shouldn't be used here.
         unorderedListDepth++;
       },
 
@@ -109,13 +109,11 @@ export default {
         const currentUnorderedListStyle = /** @type {UnorderedListMarker} */ (
           sourceCode.text[nodeStartOffset]
         );
-        const currentUnorderedListDepth =
-          style === 'sublist' ? unorderedListDepth % 3 : 0;
+        const currentUnorderedListDepth = style === 'sublist' ? unorderedListDepth : 0;
 
-        if (unorderedListStyle[currentUnorderedListDepth] === null) {
-          // TODO: Simplify this logic.
+        if (!unorderedListStyle[currentUnorderedListDepth]) {
           if (
-            unorderedListStyle[(currentUnorderedListDepth + 2) % 3] ===
+            unorderedListStyle[currentUnorderedListDepth - 1] ===
             currentUnorderedListStyle
           ) {
             unorderedListStyle[currentUnorderedListDepth] = getNextUnorderedListMarker(
@@ -150,8 +148,10 @@ export default {
         }
       },
 
-      'list[ordered=false]:exit'() {
-        // When exiting an unordered list, decrease depth.
+      'list:exit'() {
+        // When exiting a list node, decrease the depth.
+        // `markdownlint` also decrements depth for ordered lists,
+        // so `list[ordered=false]:exit` shouldn't be used here.
         unorderedListDepth--;
       },
     };
