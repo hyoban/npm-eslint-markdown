@@ -113,6 +113,7 @@ export default {
         // `unorderedListStyle[currentListDepth]` can be `null` or `undefined`.
         if (!unorderedListStyle[currentListDepth]) {
           unorderedListStyle[currentListDepth] =
+            // If the previous depth used the same style, use the next style in sequence.
             unorderedListStyle[currentListDepth - 1] === currentUnorderedListStyle
               ? getNextUnorderedListMarker(currentUnorderedListStyle)
               : currentUnorderedListStyle;
