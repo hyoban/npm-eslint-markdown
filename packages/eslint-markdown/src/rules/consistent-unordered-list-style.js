@@ -26,10 +26,9 @@ import { URL_RULE_DOCS } from '../core/constants.js';
 // --------------------------------------------------------------------------------
 
 /**
- * Get the next unordered list marker in sequence. Inspired by `markdownlint`.
+ * Get the next unordered list marker in sequence. Inspired by [`markdownlint`](https://github.com/DavidAnson/markdownlint/blob/v0.40.0/lib/md004.mjs#L9).
  * @param {UnorderedListMarker} currentUnorderedListMarker The current unordered list marker.
  * @returns {UnorderedListMarker} The next unordered list marker.
- * @see https://github.com/DavidAnson/markdownlint/blob/v0.40.0/lib/md004.mjs#L9
  */
 function getNextUnorderedListMarker(currentUnorderedListMarker) {
   if (currentUnorderedListMarker === '-') {
